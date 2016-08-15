@@ -50,8 +50,8 @@ int main( const int argc, const char * const * const argv )
         {
             fprintf( stderr, "Decompression of block %" PRIuFAST16 " failed!\n", i );
         }
-        fwrite( output, outlength, 1, outfile );
         free( input );
+        fwrite( output, outlength, 1, outfile );
         free( output );
         
         // useful debug stuff
