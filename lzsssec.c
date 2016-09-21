@@ -403,7 +403,7 @@ int main( const int argc, const char * const * const argv )
         }
         free( oldinput );
         uint8_t * newinput = checked_malloc( newinlength );
-        newinlength = expand( newoutput, newinput, outlength );
+        newinlength = compress( newoutput, newinput, outlength );
         romposition += 4 + newinlength;
         inlengthtable[i] = newinlength;
         datatable[i] = newinput;

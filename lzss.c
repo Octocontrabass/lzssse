@@ -1,4 +1,5 @@
 #include "lzss.h"
+#include <string.h>
 
 uint_fast16_t decompress( const uint8_t * input, uint8_t * output, uint_fast16_t inlength, uint_fast16_t outlength )
 {
@@ -53,6 +54,46 @@ uint_fast16_t expand( const uint8_t * input, uint8_t * output, uint_fast16_t inl
         for( uint_fast8_t i = 0; i < 8; i++ )
         {
             output[ outptr++ ] = input[ inptr++ ];
+            if( inptr >= inlength ) return outptr;
+        }
+    }
+    return outptr;
+}
+
+uint_fast16_t compress( const uint8_t * input, uint8_t * output, uint_fast16_t inlength )
+{
+    uint_fast16_t inptr = 0;
+    uint_fast16_t outptr = 0;
+    uint_fast16_t ctlptr = 0;
+    if( inptr >= inlength ) return outptr;
+    while( 1 )
+    {
+        output[ ctlptr = outptr++ ] = 0;
+        for( uint_fast8_t i = 0; i < 8; i++ )
+        {
+            uint_fast8_t bestlength = 2;
+            uint_fast8_t maxlength = inlength - inptr > 18 ? 18 : inlength - inptr;
+            uint_fast16_t bestptr = 0;
+            for( uint_fast16_t j = 0; j < inptr && j < 4096 && bestlength < maxlength; j++ )
+            {
+                while( !memcmp( &input[ inptr - j - 1 ], &input[ inptr ], bestlength + 1 ) )
+                {
+                    bestptr = j;
+                    bestlength++;
+                    if( bestlength >= maxlength ) break;
+                }
+            }
+            if( bestlength > 2 )
+            {
+                output[ ctlptr ] |= 1 << (7 - i);
+                output[ outptr++ ] = (bestptr << 4) | (bestlength - 3);
+                output[ outptr++ ] = bestptr >> 4;
+                inptr += bestlength;
+            }
+            else
+            {
+                output[ outptr++ ] = input[ inptr++ ];
+            }
             if( inptr >= inlength ) return outptr;
         }
     }
